@@ -1,0 +1,1 @@
+console=tty1 console=ttyAMA0,115200 root=/dev/ram0 rw rootwait rootfstype=tmpfs init=/sbin/init cma=384M panic=5 debug

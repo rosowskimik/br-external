@@ -1,0 +1,41 @@
+# Please note that this is only a sample, we recommend you to change it to fit
+# your needs.
+# You should override this file using BR2_PACKAGE_RPI_FIRMWARE_CONFIG_FILE.
+# See http://buildroot.org/manual.html#rootfs-custom
+# and http://elinux.org/RPiconfig for a description of config.txt syntax
+
+# Bootloader files
+start_file=start4.elf
+fixup_file=fixup4.dat
+
+# Enable 64 bit mode
+arm_64bit=1
+
+# Run as fast as firmware / board allows
+arm_boost=1
+
+# Enable debug UART output from bootloader
+enable_uart=1
+uart_2ndstage=1
+
+# DT Params
+#  Disable audio
+dtparam=audio=off
+#  Disable hdmi
+dtparam=hdmi=off
+#  Enable i2c
+dtparam=i2c_arm=on
+#  # Enable spi
+dtparam=spi=on
+
+# DT Overlays
+#  Disable bluetooth
+dtoverlay=disable-bt
+#  Disable WiFi
+dtoverlay=disable-wifi
+#  Enable GPU
+dtoverlay=vc4-kms-v3d,cma-128,noaudio,nohdmi
+
+[rpi4]
+kernel=u-boot.bin
+device_tree=bcm2711-rpi-4-b.dtb
