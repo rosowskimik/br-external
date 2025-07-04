@@ -1,0 +1,17 @@
+config BR2_PACKAGE_LUAKIT
+	bool "luakit"
+	depends on BR2_PACKAGE_HAS_LUAINTERPRETER
+	depends on BR2_PACKAGE_WEBKITGTK
+	select BR2_PACKAGE_LUAFILESYSTEM
+	select BR2_PACKAGE_SQLITE
+	help
+		Luakit is a fast, light and simple to use micro-browser framework
+		extensible by Lua using the WebKit web content engine and the GTK+ toolkit.
+
+
+comment "Luakit needs Lua 5.1 interpreter"
+	depends on !BR2_PACKAGE_HAS_LUAINTERPRETER
+	depends on BR2_PACKAGE_LUA && !BR2_PACKAGE_LUA_5_1
+
+comment "Luakit needs WebkitGTK"
+	depends on !BR2_PACKAGE_WEBKITGTK
