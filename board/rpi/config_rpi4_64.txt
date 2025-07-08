@@ -18,24 +18,6 @@ arm_boost=1
 enable_uart=1
 uart_2ndstage=1
 
-# DT Params
-#  Disable audio
-dtparam=audio=off
-#  Disable hdmi
-dtparam=hdmi=off
-#  Enable i2c
-dtparam=i2c_arm=on
-#  # Enable spi
-dtparam=spi=on
-
-# DT Overlays
-#  Disable bluetooth
-dtoverlay=disable-bt
-#  Disable WiFi
-dtoverlay=disable-wifi
-#  Enable GPU
-dtoverlay=vc4-kms-v3d,cma-128,noaudio,nohdmi
-
 [rpi4]
 kernel=u-boot.bin
-device_tree=bcm2711-rpi-4-b.dtb
+# device_tree=bcm2711-rpi-4-b.dtb
