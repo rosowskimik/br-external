@@ -1,3 +1,4 @@
 source "$BR2_EXTERNAL_RPI_PATH/package/aml/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/neatvnc/Config.in"
+source "$BR2_EXTERNAL_RPI_PATH/package/wayvnc/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/luakit/Config.in"
