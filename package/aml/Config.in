@@ -1,6 +1,0 @@
-config BR2_PACKAGE_AML
-    bool "aml"
-    help
-        Another Main Loop
-
-        https://github.com/any1/aml
