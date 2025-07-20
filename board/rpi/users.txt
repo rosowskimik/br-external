@@ -1,1 +1,1 @@
-rpi -2 rpi -2 =rpi /home/rpi /bin/bash wheel Main user
+mroso -2 mroso -2 =test1234 /home/mroso /bin/bash wheel,systemd-journal Main user
