@@ -15,6 +15,6 @@ arm_boost=1
 enable_uart=1
 uart_2ndstage=1
 
-[rpi4]
+[pi4]
 kernel=u-boot.bin
 device_tree=bcm2711-rpi-4-b-custom.dtb
