@@ -1,0 +1,23 @@
+# See http://buildroot.org/manual.html#rootfs-custom
+# and http://elinux.org/RPiconfig for a description of config.txt syntax
+
+# Bootloader files
+start_file=start_x.elf
+fixup_file=fixup_x.dat
+
+# Enable 64 bit mode
+arm_64bit=1
+
+# Run as fast as firmware / board allows
+arm_boost=1
+
+# Enable debug UART output from bootloader
+enable_uart=1
+uart_2ndstage=1
+
+# How much memory in MB to assign to the GPU
+gpu_mem=64
+
+[pi02]
+kernel=u-boot.bin
+device_tree=bcm2710-rpi-zero-2-w-custom.dtb

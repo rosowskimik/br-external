@@ -10,16 +10,19 @@ image boot.vfat {
 
 image sdcard.img {
 	hdimage {
+		partition-table-type = "hybrid"
 	}
 
-	partition boot {
+	partition efi {
+		partition-type-uuid = "esp"
 		partition-type = 0xC
 		bootable = "true"
 		image = "boot.vfat"
 	}
 
 	partition rootfs {
+		partition-type-uuid = "linux"
 		partition-type = 0x83
-		image = "rootfs.ext4"
+		image = "rootfs.f2fs"
 	}
 }
