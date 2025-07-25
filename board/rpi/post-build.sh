@@ -23,4 +23,6 @@ cp -r ${linux_dir}/arch/arm/boot/dts/overlays/*.dtbo ${BINARIES_DIR}/rpi-firmwar
 cp -r ${linux_dir}/arch/arm/boot/dts/overlays/README ${BINARIES_DIR}/rpi-firmware/overlays
 
 # Boot directly from initramfs
-rm -fv ${TARGET_DIR}/etc/initrd-release
+if [ -d ${TARGET_DIR}/etc/systemd ]; then
+  rm -fv ${TARGET_DIR}/etc/initrd-release
+fi
