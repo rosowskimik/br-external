@@ -2,8 +2,8 @@
 # and http://elinux.org/RPiconfig for a description of config.txt syntax
 
 # Bootloader files
-start_file=start4.elf
-fixup_file=fixup4.dat
+start_file=start4x.elf
+fixup_file=fixup4x.dat
 
 # Enable 64 bit mode
 arm_64bit=1
