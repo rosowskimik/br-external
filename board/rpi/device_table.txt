@@ -6,4 +6,4 @@
 # dynamic configurations (where devtmpfs, mdev or udev are used).
 #
 # <name>				<type>	<mode>	<uid>	<gid>	<major>	<minor>	<start>	<inc>	<count>
-/etc/sudoers            f   440 0   0   -   -   -   -   -
+/etc/sudoers			f		440		0		0		-		-		-		-		-
