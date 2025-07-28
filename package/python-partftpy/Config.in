@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_PARTFTPY
+	bool "python-partftpy"
+	depends on BR2_PACKAGE_PYTHON3
+	help
+	  Pure Python TFTP library (copyparty edition)
+
+	  https://github.com/9001/partftpy

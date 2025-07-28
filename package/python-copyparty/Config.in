@@ -1,0 +1,43 @@
+config BR2_PACKAGE_PYTHON_COPYPARTY
+	bool "python-copyparty"
+	depends on BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_PYTHON3_SSL # runtime
+	select BR2_PACKAGE_PYTHON3_PYEXPAT # runtime
+	select BR2_PACKAGE_PYTHON3_ZLIB # runtime
+	select BR2_PACKAGE_PYTHON_JINJA2 # runtime
+	help
+	  Portable file server with accelerated resumable uploads, dedup,
+	  WebDAV, FTP, TFTP, zeroconf, media indexer, thumbnails++
+	  all in one file, no deps
+
+	  https://github.com/9001/copyparty
+
+if BR2_PACKAGE_PYTHON_COPYPARTY
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_TFTP
+	bool "TFTP support"
+	select BR2_PACKAGE_PYTHON_PARTFTPY
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_SQLITE
+	bool "SQLite support"
+	select BR2_PACKAGE_PYTHON3_SQLITE
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_ARGON2
+	bool "Password hashing"
+	select BR2_PACKAGE_PYTHON_ARGON2_CFFI
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_PILLOW
+	bool "Image thumbnails"
+	select BR2_PACKAGE_PYTHON_PILLOW
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_FFMPEG
+	bool "Video transcode"
+	select BR2_PACKAGE_FFMPEG
+	select BR2_PACKAGE_FFMPEG_FFMPEG
+
+	config BR2_PACKAGE_PYTHON_COPYPARTY_FFPROBE
+	bool "Audio/media tags"
+	select BR2_PACKAGE_FFMPEG
+	select BR2_PACKAGE_FFMPEG_PROBE
+
+endif #BR2_PACKAGE_PYTHON_COPYPARTY
