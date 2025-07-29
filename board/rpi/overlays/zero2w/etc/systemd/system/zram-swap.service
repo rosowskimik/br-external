@@ -1,0 +1,12 @@
+[Unit]
+Description=Zram Swap Setup
+After=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/sh -c "zramctl --find --size 512M --algorithm zstd | xargs -r mkswap && swapon /dev/zram* --priority 100"
+ExecStop=/bin/sh -c "swapoff /dev/zram* && zramctl --reset /dev/zram0"
+
+[Install]
+WantedBy=multi-user.target
