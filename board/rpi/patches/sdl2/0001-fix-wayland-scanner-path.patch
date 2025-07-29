@@ -1,0 +1,43 @@
+From 2a30c08faede5eac8f302ca236c488112c00d81b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miko=C5=82aj=20Rosowski?= <m.rosowski1@wp.pl>
+Date: Tue, 29 Jul 2025 20:03:07 +0200
+Subject: [PATCH] fix wayland-scanner path
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Mikołaj Rosowski <m.rosowski1@wp.pl>
+---
+ configure    | 2 +-
+ configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure b/configure
+index 3b401e6..1e13e2d 100755
+--- a/configure
++++ b/configure
+@@ -23281,7 +23281,7 @@ printf %s "checking for Wayland support... " >&6; }
+             if $PKG_CONFIG --exists 'wayland-client >= 1.18' wayland-scanner wayland-egl wayland-cursor egl 'xkbcommon >= 0.5.0'; then
+                 WAYLAND_CFLAGS=`$PKG_CONFIG --cflags wayland-client wayland-egl wayland-cursor xkbcommon`
+                 WAYLAND_LIBS=`$PKG_CONFIG --libs wayland-client wayland-egl wayland-cursor xkbcommon`
+-                WAYLAND_SCANNER=`$PKG_CONFIG --variable=wayland_scanner wayland-scanner`
++                WAYLAND_SCANNER=`which wayland-scanner`
+                 if $PKG_CONFIG --exists 'wayland-scanner >= 1.15'
+ then :
+   WAYLAND_SCANNER_CODE_MODE=private-code
+diff --git a/configure.ac b/configure.ac
+index 5436001..ae049c3 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1710,7 +1710,7 @@ CheckWayland()
+             if $PKG_CONFIG --exists 'wayland-client >= 1.18' wayland-scanner wayland-egl wayland-cursor egl 'xkbcommon >= 0.5.0'; then
+                 WAYLAND_CFLAGS=`$PKG_CONFIG --cflags wayland-client wayland-egl wayland-cursor xkbcommon`
+                 WAYLAND_LIBS=`$PKG_CONFIG --libs wayland-client wayland-egl wayland-cursor xkbcommon`
+-                WAYLAND_SCANNER=`$PKG_CONFIG --variable=wayland_scanner wayland-scanner`
++                WAYLAND_SCANNER=`which wayland-scanner`
+                 AS_IF([$PKG_CONFIG --exists 'wayland-scanner >= 1.15'],
+                       [WAYLAND_SCANNER_CODE_MODE=private-code],
+                       [WAYLAND_SCANNER_CODE_MODE=code])
+-- 
+2.50.1
+
