@@ -1,0 +1,8 @@
+config BR2_PACKAGE_CADDY
+	bool "caddy"
+	depends on BR2_PACKAGE_HOST_GO_TARGET_ARCH_SUPPORTS
+	help
+	  Fast and extensible multi-platform HTTP/1-2-3 web server with
+	  automatic HTTPS
+
+	  https://github.com/caddyserver/caddy

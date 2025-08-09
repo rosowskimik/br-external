@@ -1,2 +1,3 @@
+source "$BR2_EXTERNAL_RPI_PATH/package/caddy/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/python-copyparty/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/python-partftpy/Config.in"
