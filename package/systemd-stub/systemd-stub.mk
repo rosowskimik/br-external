@@ -22,9 +22,9 @@ SYSTEMD_STUB_DEPENDENCIES = \
 	host-python-jinja2 \
 	host-python-pyelftools \
 	gnu-efi \
-	kmod \
 	libcap \
-	libxcrypt
+	libxcrypt \
+	util-linux
 
 SYSTEMD_STUB_CONF_ENV = $(HOST_UTF8_LOCALE_ENV)
 SYSTEMD_STUB_NINJA_ENV = $(HOST_UTF8_LOCALE_ENV)
