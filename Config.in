@@ -1,5 +1,6 @@
 menu "Target Packages"
 
+source "$BR2_EXTERNAL_RPI_PATH/package/aml/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/caddy/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/copyparty/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/python-partftpy/Config.in"
