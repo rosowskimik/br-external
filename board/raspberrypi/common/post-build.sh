@@ -1,6 +1,8 @@
 #!/bin/sh
+set -eo pipefail
 
-set -eu
+# LINUX_IMAGE_NAME
+KERNEL="$2"
 
 # Add a console on tty1
 if [ -e ${TARGET_DIR}/etc/inittab ]; then
@@ -21,8 +23,3 @@ mkdir -p ${BINARIES_DIR}/rpi-firmware/overlays
 cp -r ${linux_dir}/arch/arm/boot/dts/overlays/*.dtb ${BINARIES_DIR}/rpi-firmware/overlays
 cp -r ${linux_dir}/arch/arm/boot/dts/overlays/*.dtbo ${BINARIES_DIR}/rpi-firmware/overlays
 cp -r ${linux_dir}/arch/arm/boot/dts/overlays/README ${BINARIES_DIR}/rpi-firmware/overlays
-
-# Boot directly from initramfs
-if [ -d ${TARGET_DIR}/etc/systemd ]; then
-  rm -fv ${TARGET_DIR}/etc/initrd-release
-fi

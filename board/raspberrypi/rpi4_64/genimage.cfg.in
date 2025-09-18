@@ -1,0 +1,22 @@
+image boot.vfat {
+	vfat {
+		files = {
+#BOOT_FILES#
+		}
+	}
+
+	size = 256M
+}
+
+image sdcard.img {
+	hdimage {
+		partition-table-type = "hybrid"
+	}
+
+	partition efi {
+		partition-type-uuid = "esp"
+		partition-type = 0xC
+		bootable = "true"
+		image = "boot.vfat"
+	}
+}
