@@ -17,7 +17,7 @@ rootfs-uki: rootfs-cpio
 	$(ROOTFS_UKI_BUILD_IMAGE)
 
 rootfs-uki-show-depends:
-	@echo systemd-stub rootfs-cpio
+	@echo host-ukify systemd-stub rootfs-cpio
 
 ifeq ($(BR2_TARGET_ROOTFS_UKI),y)
 TARGETS_ROOTFS += rootfs-uki
@@ -56,7 +56,7 @@ ROOTFS_UKI_DEPENDENCIES += host-imagemagick
 ROOTFS_UKI_BUILD_OPTS += --splash $(BINARIES_DIR)/splash.bmp
 
 define ROOTFS_UKI_CONVERT_SPLASH
-	$(HOST_DIR)/bin/convert \
+	$(HOST_DIR)/bin/magick \
 		$(ROOTFS_UKI_SPLASH_IMAGE) \
 		-type TrueColor -define bmp:format=bmp3 \
 		$(BINARIES_DIR)/splash.bmp
