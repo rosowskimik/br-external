@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "arm/broadcom/bcm2711-rpi-4-b.dts"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/clock/bcm2835.h>
+
+// i2c_arm=on
+&i2c_arm {
+	status = "okay";
+};
+
+// spi=on
+&spi {
+	status = "okay";
+};
+
+// disable-bt
+&uart1 {
+	status = "disabled";
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+	status = "okay";
+};
+
+&bt {
+	status = "disabled";
+};
+
+&uart0_pins {
+	brcm,pins;
+	bcrm,function;
+	bcrm,pull;
+};
+
+/ {
+	aliases {
+		serial0 = &uart0;
+		serial1 = &uart1;
+	};
+};
+
+// disable-wifi
+&mmc {
+	status = "disabled";
+};
+
+&mmcnr {
+	status = "disabled";
+};
+
+// vc4-kms-v3d,cma-128,noaudio,nohdmi -> vc4-kms-v3d-pi4
+&cma {
+	size = <0x8000000>;
+};
+
+&hvs {
+	status = "okay";
+};
+
+&pixelvalve0 {
+	status = "okay";
+};
+
+&pixelvalve1 {
+	status = "okay";
+};
+
+&pixelvalve3 {
+	status = "okay";
+};
+
+&v3d {
+	status = "okay";
+};
+
+&vc4 {
+	status = "okay";
+};
+
+&txp {
+	status = "okay";
+};
+
+&fb {
+	status = "disabled";
+};
+
+&firmwarekms {
+	status = "disabled";
+};
+
+&dvp {
+	status = "okay";
+};
+
+&aon_intr {
+	status = "okay";
+};

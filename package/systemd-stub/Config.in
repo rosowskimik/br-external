@@ -1,0 +1,21 @@
+config BR2_PACKAGE_SYSTEMD_STUB_ARCH_SUPPORTS
+	bool
+	default y if BR2_aarch64
+	default y if BR2_arm
+	default y if BR2_i386 || BR2_x86_64
+	default y if BR2_riscv
+
+config BR2_PACKAGE_SYSTEMD_STUB_EFI_ARCH
+	string
+	default "aa64"  if BR2_aarch64
+	default "arm"   if BR2_arm
+	default "ia32"  if BR2_i386
+	default "x64"   if BR2_x86_64
+	default "riscv" if BR2_riscv
+
+config BR2_PACKAGE_SYSTEMD_STUB
+	bool
+	depends on BR2_PACKAGE_SYSTEMD_STUB_ARCH_SUPPORTS
+	select BR2_PACKAGE_GNU_EFI
+	select BR2_PACKAGE_LIBCAP
+	select BR2_PACKAGE_LIBXCRYPT
