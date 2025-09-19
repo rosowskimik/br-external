@@ -1,10 +1,7 @@
 #!/bin/sh
 set -eu
 
-# LINUX_IMAGE_NAME
-KERNEL="$2"
-
 # boot directly from initramfs
-if [ -d ${target_dir}/etc/systemd ]; then
-  rm -fv ${target_dir}/etc/initrd-release
+if [ -d ${TARGET_DIR}/etc/systemd ]; then
+  rm -fv ${TARGET_DIR}/etc/initrd-release
 fi

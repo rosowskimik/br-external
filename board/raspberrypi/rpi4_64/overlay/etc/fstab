@@ -1,5 +1,5 @@
 # <file system>	<mount pt>	<type>	<options>	<dump>	<pass>
 /dev/mmcblk0p1	/efi	vfat	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0	2
-/dev/mmcblk0p2	/persist	f2fs	defaults,rw,noatime,x-systemd.makefs	0	1
-/dev/mmcblk0p3	none	swap	defaults,pri=-2,x-systemd.makefs	0	0
-overlay	/	overlay	defaults,rw,noauto,x-systemd.automount,lowerdir=/,upperdir=/persist,work=/tmp/root_workdir
+# /dev/mmcblk0p2	/persist	f2fs	defaults,rw,noatime,x-systemd.makefs	0	1
+# /dev/mmcblk0p3	none	swap	defaults,pri=-2,x-systemd.makefs	0	0
+# overlay	/	overlay	defaults,rw,noauto,x-systemd.automount,lowerdir=/,upperdir=/persist,work=/tmp/root_workdir

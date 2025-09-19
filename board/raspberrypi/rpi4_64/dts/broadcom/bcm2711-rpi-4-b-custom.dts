@@ -31,8 +31,14 @@
 
 &uart0_pins {
 	brcm,pins;
-	bcrm,function;
-	bcrm,pull;
+	brcm,functions;
+	brcm,pull;
+};
+
+&bt_pins {
+	brcm,pins;
+	brcm,functions;
+	brcm,pull;
 };
 
 / {

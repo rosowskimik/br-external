@@ -1,1 +1,1 @@
-console=tty1 console=ttyAMA0,115200 root=/dev/ram0 ro rootwait rootfstype=tmpfs cma=128M panic=5 snd_bcm2835.enable_hdmi=0 snd_bcm2835.enable_headphones=0 coherent_pool=1M 8250.nr_uarts=1 cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=0
+console=tty1 console=ttyAMA0,115200 root=/dev/ram0 rw rootwait rootfstype=tmpfs panic=5 bgrt_disable loglevel=3 systemd.show_status=auto cma=128M snd_bcm2835.enable_hdmi=0 snd_bcm2835.enable_headphones=0 coherent_pool=1M cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=0

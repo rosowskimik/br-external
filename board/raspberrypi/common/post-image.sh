@@ -7,7 +7,7 @@ KERNEL="$2"
 BOARD_DIR="$(dirname $0)"
 BOARD_NAME="$(basename ${BOARD_DIR})"
 
-GENIMAGE_CFG_IN="${BR2_EXTERNAL_RPI_PATH}/board/rpi/genimage-${BOARD_NAME}.cfg.in"
+GENIMAGE_CFG_IN="${BR2_EXTERNAL_RPI_PATH}/board/raspberrypi/${BOARD_NAME}/genimage.cfg.in"
 GENIMAGE_CFG="${BINARIES_DIR}/genimage.cfg"
 
 FILES=(
