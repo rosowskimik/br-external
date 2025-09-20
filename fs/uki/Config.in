@@ -18,6 +18,13 @@ comment "UKI needs a Linux kernel to be built"
 
 if BR2_TARGET_ROOTFS_UKI
 
+config BR2_TARGET_ROOTFS_UKI_DEVICETREE
+	bool "Embed devicetree into unified kernel image"
+	depends on BR2_LINUX_KERNEL_DTS_SUPPORT
+	default y
+	help
+	  Embed devicetree file(s) into unified kernel image
+
 config BR2_TARGET_ROOTFS_UKI_CMDLINE_FILE
 	string "Kernel cmdline file"
 	help
@@ -33,10 +40,6 @@ config BR2_TARGET_ROOTFS_UKI_SPLASH_IMAGE
 	string "Splash image path"
 	help
 	  Path to splash image to be embedded in the UKI
-
-config BR2_TARGET_ROOTFS_UKI_DEVICETREE
-	bool
-	default y if BR2_LINUX_KERNEL_DTS_SUPPORT
 
 config BR2_TARGET_ROOTFS_UKI_NEED_ZBOOT
 	bool
