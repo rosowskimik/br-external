@@ -1,1 +1,1 @@
-rpi -2 rpi -2 =test1234 /home/rpi /bin/bash sudo,systemd-journal Main user
+rpi -2 rpi -2 =test1234 /home/rpi /bin/bash wheel,systemd-journal Main user
