@@ -53,15 +53,6 @@
 	};
 };
 
-// disable-wifi
-&mmc {
-	status = "disabled";
-};
-
-&mmcnr {
-	status = "disabled";
-};
-
 // vc4-kms-v3d,cma-128,noaudio,nohdmi -> vc4-kms-v3d-pi4
 &cma {
 	size = <0x8000000>;
