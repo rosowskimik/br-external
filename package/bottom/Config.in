@@ -1,0 +1,8 @@
+config BR2_PACKAGE_BOTTOM
+    bool "bottom"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC
+    help
+      Yet another cross-platform graphical process/system monitor
+
+      https://github.com/ClementTsang/bottom
