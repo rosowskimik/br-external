@@ -5,7 +5,7 @@
 ################################################################################
 
 BOTTOM_VERSION = 0.11.2
-BOTTOM_SITE = $(call github,ClementTsang,bottom,0.11.2)
+BOTTOM_SITE = $(call github,ClementTsang,bottom,$(BOTTOM_VERSION))
 BOTTOM_LICENSE = MIT
 BOTTOM_LICENSE_FILES = LICENSE
 
