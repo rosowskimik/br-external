@@ -1,0 +1,8 @@
+config BR2_PACKAGE_LAB_MODULE
+	bool "lab module"
+	depends on BR2_LINUX_KERNEL
+	help
+	  Drivers lab module
+
+comment "Lab module needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL

@@ -9,6 +9,8 @@ source "$BR2_EXTERNAL_RPI_PATH/package/python-partftpy/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/systemd-stub/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/wayvnc/Config.in"
 
+source "$BR2_EXTERNAL_RPI_PATH/package/lab-module/Config.in"
+
 endmenu
 
 menu "Host Packages"
