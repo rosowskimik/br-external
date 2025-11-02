@@ -1,0 +1,36 @@
+:name: RISC-V
+:description: This script runs Linux (with OpenSBI) on a 64-bit RISC-V CPU.
+
+$kernel?=$ORIGIN/../Image
+$rootfs?=$ORIGIN/../rootfs.ext2
+$dtb?=$ORIGIN/../renode-virt.dtb
+$opensbi?=$ORIGIN/../fw_jump.elf
+$name?="Linux RISC-V"
+
+using sysbus
+mach create $name
+
+machine LoadPlatformDescription $ORIGIN/riscv64_virt.repl
+
+vblk0 LoadImage $rootfs
+
+showAnalyzer uart0
+
+macro reset
+"""
+    # Linux kernel
+    sysbus LoadBinary $kernel 0x80200000
+
+    # Devicetree
+    sysbus LoadBinary $dtb 0x88000000
+    cpu0 SetRegister 'A1' 0x88000000
+    cpu1 SetRegister 'A1' 0x88000000
+
+    # OpenSBI
+    sysbus LoadELF $opensbi
+    cpu0 SetRegister 'A0' 0
+    cpu1 SetRegister 'A0' 1
+"""
+runMacro $reset
+
+start

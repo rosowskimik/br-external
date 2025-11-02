@@ -1,0 +1,28 @@
+From c578f119e10c22aa1da5a85d4199bf0e0250ed6d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miko=C5=82aj=20Rosowski?= <m.rosowski1@wp.pl>
+Date: Sun, 2 Nov 2025 15:11:39 +0100
+Subject: [PATCH] riscv/dts: add renode dir
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Mikołaj Rosowski <m.rosowski1@wp.pl>
+---
+ arch/riscv/boot/dts/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/riscv/boot/dts/Makefile b/arch/riscv/boot/dts/Makefile
+index fdae05bbf..9ccc77df2 100644
+--- a/arch/riscv/boot/dts/Makefile
++++ b/arch/riscv/boot/dts/Makefile
+@@ -3,6 +3,7 @@ subdir-y += allwinner
+ subdir-y += canaan
+ subdir-y += microchip
+ subdir-y += renesas
++subdir-y += renode
+ subdir-y += sifive
+ subdir-y += sophgo
+ subdir-y += starfive
+-- 
+2.51.2
+

@@ -1,0 +1,131 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	compatible = "renode,riscv64-virt";
+	model = "renode,riscv64-virt";
+
+	chosen {
+		bootargs = "console=ttyS0 earlycon=sbi root=/dev/vda rw rootfstype=ext2";
+		stdout-path = "serial0:115200n8";
+	};
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	ram: memory@80000000 {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		device_type = "memory";
+		reg = <0 0x80000000 0 0x80000000>;
+	};
+
+	sys_clk: clock0 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+		clock-accuracy = <100>;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		timebase-frequency = <1000000>;
+
+		cpu0: cpu@0 {
+			clock-frequency = <100000000>;
+			compatible = "riscv";
+			device_type = "cpu";
+			mmu-type = "riscv,sv39";
+			reg = <0>;
+			riscv,isa = "rv64imafdc";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c", "zicsr", "zifencei", "zba", "zbb", "zbc", "zbs";
+
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+
+		cpu1: cpu@1 {
+			clock-frequency = <100000000>;
+			compatible = "riscv";
+			device_type = "cpu";
+			mmu-type = "riscv,sv39";
+			reg = <1>;
+			riscv,isa = "rv64imafdc";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c", "zicsr", "zifencei", "zba", "zbb", "zbc", "zbs";
+
+			cpu1_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+	};
+
+	soc {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		compatible = "simple-bus";
+		ranges;
+
+		clint: timer@2000000 {
+			compatible = "riscv,clint0";
+			interrupts-extended =
+				<&cpu0_intc 3>, <&cpu0_intc 7>,
+				<&cpu1_intc 3>, <&cpu1_intc 7>;
+			reg = <0 0x2000000 0 0xc000>;
+		};
+
+		plic: interrupt-controller@c000000 {
+			#address-cells = <0>;
+			#interrupt-cells = <1>;
+			compatible = "riscv,plic0";
+			interrupt-controller;
+			interrupts-extended =
+				<&cpu0_intc 11>, <&cpu0_intc 9>,
+				<&cpu1_intc 11>, <&cpu1_intc 9>;
+			reg = <0 0xc000000 0 0x4000000>;
+			riscv,ndev = <16>;
+		};
+
+		uart0: serial@10010000 {
+			compatible = "ns16550a";
+			reg = <0 0x10010000 0 0x11>;
+			interrupt-parent = <&plic>;
+			interrupts = <1>;
+			clocks = <&sys_clk>;
+			current-speed = <115200>;
+			fifo-size = <16>;
+		};
+
+		vblk0: virtio@10020000 {
+			compatible = "virtio,mmio";
+			reg = <0 0x10020000 0 0x200>;
+			interrupt-parent = <&plic>;
+			interrupts = <2>;
+		};
+
+		vrng0: virtio@10030000 {
+			compatible = "virtio,mmio";
+			reg = <0 0x10030000 0 0x200>;
+			interrupt-parent = <&plic>;
+			interrupts = <3>;
+		};
+
+		rtc0: rtc@10090000 {
+			compatible = "arm,pl031", "arm,primecell";
+			reg = <0 0x10090000 0 0x1000>;
+			interrupt-parent = <&plic>;
+			interrupts = <4>;
+			clocks = <&sys_clk>;
+			clock-names = "apb_pclk";
+		};
+	};
+};

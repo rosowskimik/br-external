@@ -1,0 +1,52 @@
+cpu0: CPU.RiscV64 @ sysbus
+    cpuType: "rv64imafdc_zicsr_zifencei_zba_zbb_zbc_zbs"
+    hartId: 0
+    privilegedArchitecture: PrivilegedArchitecture.Priv1_10
+    timeProvider: clint
+    allowUnalignedAccesses: true
+
+cpu1: CPU.RiscV64 @ sysbus
+    cpuType: "rv64imafdc_zicsr_zifencei_zba_zbb_zbc_zbs"
+    hartId: 1
+    privilegedArchitecture: PrivilegedArchitecture.Priv1_10
+    timeProvider: clint
+    allowUnalignedAccesses: true
+
+// 2 GiB RAM
+ram: Memory.MappedMemory @ sysbus 0x80000000
+    size: 0x80000000
+
+clint: IRQControllers.CoreLevelInterruptor  @ sysbus 0x2000000
+    [0, 1] -> cpu0@[3, 7]
+    [2, 3] -> cpu1@[3, 7]
+    numberOfTargets: 2
+    frequency: 1000000
+
+plic: IRQControllers.PlatformLevelInterruptController @ sysbus 0xc000000
+    [0, 1] -> cpu0@[11, 9]
+    [2, 3] -> cpu1@[11, 9]
+    numberOfSources: 16
+    numberOfContexts: 4
+
+uart0: UART.NS16550 @ sysbus 0x10010000
+    wideRegisters: true
+    IRQ -> plic@1
+
+vblk0: Storage.VirtIOBlockDevice @ sysbus 0x10020000
+    IRQ -> plic@2
+
+vrng0: Miscellaneous.VirtIOMMIOEntropy @ sysbus 0x10030000
+    IRQ -> plic@3
+
+rtc0: Timers.PL031 @ sysbus 0x10090000
+    IRQ -> plic@4
+
+sysbus:
+    init:
+        Tag <0x80000000 0x40000> "mmode_resv0@80000000"
+        Tag <0x80040000 0x20000> "mmode_resv1@80040000"
+        Tag <0xc000000 0x4000000> "plic"
+        Tag <0x2000000 0xc000> "clint"
+        Tag <0x10020000 0x200> "vblk0"
+        Tag <0x10030000 0x200> "vrng0"
+        Tag <0x10090000 0x1000> "rtc0"
