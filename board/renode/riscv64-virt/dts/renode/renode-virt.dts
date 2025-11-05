@@ -127,5 +127,14 @@
 			clocks = <&sys_clk>;
 			clock-names = "apb_pclk";
 		};
+
+		first_device0: first_device@1000000 {
+			compatible = "put,first_device";
+			reg = <0 0x01000000 0 0xF>;
+			status = "okay";
+			label = "Hello";
+			repeat = <2>;
+                        ratio = <12 5>;
+		};
 	};
 };

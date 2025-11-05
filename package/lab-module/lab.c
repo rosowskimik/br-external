@@ -1,186 +1,69 @@
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/device/class.h>
-#include <linux/uaccess.h>
-#include <linux/err.h>
-#include <linux/errno.h>
-#include <linux/fs.h>
-#include <linux/gfp_types.h>
-#include <linux/init.h>
 #include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/mutex.h>
-#include <linux/printk.h>
-#include <linux/slab.h>
-#include <linux/stat.h>
-#include <linux/types.h>
+#include <linux/platform_device.h>
+#include <linux/of.h>
+#include <linux/ioport.h>
+#include <linux/device.h>
+#include <linux/dev_printk.h>
+#include <linux/errno.h>
 
-static uint bufsize = 1024;
-module_param(bufsize, uint, S_IRUGO);
-MODULE_PARM_DESC(bufsize, "Max buffer size");
-
-#define LAB_DEVICE_NAME "tac"
-#define LAB_DEVICE_CLASS "tac"
-
-static struct {
-	char *data;
-	size_t len;
-	struct mutex lock;
-} buffer;
-
-static struct class *lab_class;
-static struct cdev lab_cdev;
-static dev_t lab_dev;
-
-static int lab_open(struct inode *inode, struct file *filp)
+static int lab_drv_probe(struct platform_device *pdev)
 {
-	pr_debug("Open call\n");
+	struct device *dev = &pdev->dev;
+	struct device_node *np = dev->of_node;
+	struct resource *mem_res;
+	const char *label;
+	u32 repeat;
+	u32 ratio[2];
+
+	if (!(mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0))) {
+		dev_err(dev, "Failed to get memory resource\n");
+		return -ENXIO;
+	}
+
+	dev_info(dev, "Memory start: 0x%08llX\n", mem_res->start);
+	dev_info(dev, "Memory end: 0x%08llX\n", mem_res->end);
+	dev_info(dev, "Size: 0x%lld bytes\n", resource_size(mem_res));
+
+	if (of_property_read_string(np, "label", &label))
+		dev_warn(dev, "Failed to read 'label'\n");
+
+	if (of_property_read_u32(np, "repeat", &repeat))
+		dev_warn(dev, "Failed to read 'repeat'\n");
+
+	if (of_property_read_u32_array(np, "ratio", ratio, ARRAY_SIZE(ratio)))
+		dev_warn(dev, "Failed to read 'ratio'\n");
+
+	dev_info(dev, "string label = \"%s\"\n", label);
+	dev_info(dev, "u32 repeat = <%d>\n", repeat);
+	dev_info(dev, "u32 array ratio = <%d %d>\n", ratio[0], ratio[1]);
+
 	return 0;
 }
 
-static int lab_release(struct inode *inode, struct file *filp)
+static void lab_drv_remove(struct platform_device *pdev)
 {
-	pr_debug("Release call\n");
-	return 0;
+	pr_debug("Remove\n");
 }
 
-static ssize_t lab_write(struct file *filp, const char __user *buf,
-			 size_t count, loff_t *pos)
-{
-	ssize_t ret;
-
-	if (*pos >= bufsize)
-		return 0;
-
-	if (*pos + count > bufsize)
-		count = bufsize - *pos;
-
-	if (mutex_lock_interruptible(&buffer.lock)) {
-		return -ERESTARTSYS;
-	}
-
-	if (copy_from_user(buffer.data, buf, count) != 0) {
-		ret = -EFAULT;
-		goto write_exit;
-	}
-
-	*pos += count;
-	buffer.len = *pos;
-
-	ret = count;
-
-write_exit:
-	mutex_unlock(&buffer.lock);
-	return ret;
-}
-
-static ssize_t lab_read(struct file *filp, char __user *buf, size_t count,
-			loff_t *pos)
-{
-	ssize_t ret = 0;
-
-	if (mutex_lock_interruptible(&buffer.lock)) {
-		return -ERESTARTSYS;
-	}
-
-	if (*pos >= buffer.len)
-		goto read_exit;
-
-	if (*pos + count > bufsize)
-		count = buffer.len - (*pos);
-
-	for (size_t i = 0; i < count; ++i) {
-		if (put_user(buffer.data[buffer.len - i - 1], &buf[i])) {
-			ret = -EFAULT;
-			goto read_exit;
-		}
-	}
-
-	*pos += count;
-	ret = count;
-
-read_exit:
-	mutex_unlock(&buffer.lock);
-	return ret;
-}
-
-static const struct file_operations fops = {
-	.owner = THIS_MODULE,
-	.open = lab_open,
-	.release = lab_release,
-	.write = lab_write,
-	.read = lab_read,
+// clang-format off
+static const struct of_device_id lab_drv_match[] = {
+	{ .compatible = "put,first_device", },
+	{},
 };
+MODULE_DEVICE_TABLE(of, lab_drv_match);
 
-static int __init lab_init(void)
-{
-	int rc;
-	struct device *dev;
-
-	if ((rc = alloc_chrdev_region(&lab_dev, 0, 1, LAB_DEVICE_NAME))) {
-		pr_err("Failed to allocate devnum (err %d)\n", rc);
-		goto init_alloc_chrdev;
-	};
-
-	if (IS_ERR((lab_class = class_create(LAB_DEVICE_CLASS)))) {
-		rc = PTR_ERR(lab_class);
-		pr_err("Failed to create device class (err %d)\n", rc);
-		goto init_class_create;
+static struct platform_driver lab_drv = {
+	.probe	= lab_drv_probe,
+	.remove	= lab_drv_remove,
+	.driver	= {
+		.name		= "lab_driver",
+		.owner		= THIS_MODULE,
+		.of_match_table = lab_drv_match,
 	}
+};
+// clang-format on
 
-	cdev_init(&lab_cdev, &fops);
-	lab_cdev.owner = THIS_MODULE;
-
-	if ((rc = cdev_add(&lab_cdev, lab_dev, 1))) {
-		pr_err("Failed to add character device (err %d)\n", rc);
-		goto init_cdev_add;
-	}
-
-	if (IS_ERR((dev = device_create(lab_class, NULL, lab_dev, NULL,
-					LAB_DEVICE_NAME)))) {
-		rc = PTR_ERR(dev);
-		pr_err("Failed to create device file (err %d)\n", rc);
-		goto init_device_create;
-	}
-
-	if (!(buffer.data = kmalloc(bufsize, GFP_KERNEL))) {
-		rc = -ENOMEM;
-		pr_err("Failed to allocate buffer memory\n");
-		goto init_alloc_buffer;
-	}
-
-	mutex_init(&buffer.lock);
-	pr_info("Module initialized with bufsize %u\n", bufsize);
-
-	return 0;
-
-init_alloc_buffer:
-	device_destroy(lab_class, lab_dev);
-init_device_create:
-	cdev_del(&lab_cdev);
-init_cdev_add:
-	class_destroy(lab_class);
-init_class_create:
-	unregister_chrdev_region(lab_dev, 1);
-init_alloc_chrdev:
-	return rc;
-}
-
-static void __exit lab_exit(void)
-{
-	mutex_lock(&buffer.lock);
-
-	kfree(buffer.data);
-	device_destroy(lab_class, lab_dev);
-	cdev_del(&lab_cdev);
-	class_destroy(lab_class);
-	unregister_chrdev_region(lab_dev, 1);
-
-	mutex_unlock(&buffer.lock);
-}
-
-module_init(lab_init);
-module_exit(lab_exit);
+module_platform_driver(lab_drv);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Mikołaj Rosowski");
