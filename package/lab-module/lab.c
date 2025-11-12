@@ -1,14 +1,22 @@
 #include <linux/array_size.h>
-#include <linux/module.h>
-#include <linux/platform_device.h>
-#include <linux/of.h>
-#include <linux/io.h>
-#include <linux/types.h>
+#include <linux/compiler_types.h>
+#include <linux/dev_printk.h>
+#include <linux/sprintf.h>
+#include <linux/kstrtox.h>
 #include <linux/device/devres.h>
 #include <linux/errno.h>
-#include <linux/dev_printk.h>
-#include <linux/compiler_types.h>
+#include <linux/io.h>
+#include <linux/kobject.h>
+#include <linux/module.h>
+#include <linux/of.h>
+#include <linux/platform_device.h>
 #include <linux/regmap.h>
+#include <linux/slab.h>
+#include <linux/string.h>
+#include <linux/sysfs.h>
+#include <linux/types.h>
+
+#define LAB_DRV_NAME "first_device"
 
 // clang-format off
 #define LAB_DRV_ARG1	0x00
@@ -29,38 +37,93 @@ static const struct regmap_config lab_drv_regmap_config = {
 };
 
 struct lab_drv {
+	struct kobject kobj;
 	struct regmap *map;
+	struct device *dev;
 };
 
-static int lab_drv_regs_print(struct platform_device *pdev)
+static ssize_t reg_show(struct kobject *kobj, u32 reg, char *buf)
 {
-	static int regs[] = { LAB_DRV_ARG1, LAB_DRV_ARG2, LAB_DRV_OP,
-			      LAB_DRV_RES };
-	struct lab_drv *priv = platform_get_drvdata(pdev);
-	u32 val[4];
-	int res;
+	struct lab_drv *priv = container_of((void *)kobj, struct lab_drv, kobj);
+	u32 val;
+	int ret;
 
-	res = regmap_multi_reg_read(priv->map, regs, val, 4);
-	if (res)
-		return res;
+	ret = regmap_read(priv->map, reg, &val);
+	if (ret) {
+		dev_err(priv->dev, "Failed to read register 0x%02X\n", reg);
+		return ret;
+	}
 
-	dev_info(&pdev->dev, "arg1: %d, arg2: %d, op: %c, res: %d\n", val[0],
-		 val[1], (char)val[2], val[3]);
-	return 0;
+	return sprintf(buf, "%d\n", val);
 }
 
-static int lab_drv_do_op(struct platform_device *pdev, u32 arg1, u32 arg2,
-			 u32 op)
+static ssize_t reg_store(struct kobject *kobj, u32 reg, const char *buf,
+			 size_t count)
 {
-	struct lab_drv *priv = platform_get_drvdata(pdev);
-	struct reg_sequence regs[] = {
-		{ LAB_DRV_ARG1, arg1 },
-		{ LAB_DRV_ARG2, arg2 },
-		{ LAB_DRV_OP, op },
-	};
+	struct lab_drv *priv = container_of((void *)kobj, struct lab_drv, kobj);
+	u32 val;
+	int ret;
 
-	return regmap_multi_reg_write(priv->map, regs, ARRAY_SIZE(regs));
+	ret = kstrtou32(buf, 10, &val);
+	if (ret)
+		return ret;
+
+	ret = regmap_write(priv->map, reg, val);
+	if (ret) {
+		dev_err(priv->dev, "Failed to write registetr 0x%02X\n", reg);
+		return ret;
+	}
+	return count;
 }
+
+#define LAB_DRV_ATTR(_name, _reg)                                           \
+	static ssize_t _name##_show(struct kobject *kobj,                   \
+				    struct kobj_attribute *attr, char *buf) \
+	{                                                                   \
+		struct lab_drv *priv =                                      \
+			container_of((void *)kobj, struct lab_drv, kobj);   \
+		dev_info(priv->dev, "Reading " __stringify(_name) "\n");    \
+		return reg_show(kobj, _reg, buf);                           \
+	}                                                                   \
+	static ssize_t _name##_store(struct kobject *kobj,                  \
+				     struct kobj_attribute *attr,           \
+				     const char *buf, size_t count)         \
+	{                                                                   \
+		struct lab_drv *priv =                                      \
+			container_of((void *)kobj, struct lab_drv, kobj);   \
+		dev_info(priv->dev, "Writing " __stringify(_name) "\n");    \
+		return reg_store(kobj, _reg, buf, count);                   \
+	}                                                                   \
+	static struct kobj_attribute _name##_attribute = __ATTR_RW(_name)
+
+LAB_DRV_ATTR(arg1, LAB_DRV_ARG1);
+LAB_DRV_ATTR(arg2, LAB_DRV_ARG2);
+LAB_DRV_ATTR(op, LAB_DRV_OP);
+LAB_DRV_ATTR(res, LAB_DRV_RES);
+
+// clang-format off
+static struct attribute *lab_drv_attrs[] = {
+	&arg1_attribute.attr,
+	&arg2_attribute.attr,
+	&op_attribute.attr,
+	&res_attribute.attr,
+	{},
+};
+// clang-format on
+
+static const struct attribute_group lab_drv_attr_group = {
+	.attrs = lab_drv_attrs
+};
+
+static const struct attribute_group *lab_drv_attr_groups[] = {
+	&lab_drv_attr_group,
+	{},
+};
+
+static const struct kobj_type lab_drv_ktype = {
+	.sysfs_ops = &kobj_sysfs_ops,
+	.default_groups = lab_drv_attr_groups,
+};
 
 static int lab_drv_probe(struct platform_device *pdev)
 {
@@ -71,6 +134,8 @@ static int lab_drv_probe(struct platform_device *pdev)
 	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
 		return -ENOMEM;
+
+	priv->dev = &pdev->dev;
 
 	regs = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(regs))
@@ -83,46 +148,25 @@ static int lab_drv_probe(struct platform_device *pdev)
 		return dev_err_probe(&pdev->dev, PTR_ERR(priv->map),
 				     "Failed to initialize regmap\n");
 
+	res = kobject_init_and_add(&priv->kobj, &lab_drv_ktype, kernel_kobj,
+				   LAB_DRV_NAME);
+	if (res) {
+		kobject_put(&priv->kobj);
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to create kobject\n");
+	}
+
 	platform_set_drvdata(pdev, priv);
 
 	dev_info(&pdev->dev, "Device initialized\n");
 
-	res = lab_drv_regs_print(pdev);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to read registers\n");
-
-	res = lab_drv_do_op(pdev, 2, 3, LAB_DRV_OP_ADD);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to write operation\n");
-
-	res = lab_drv_regs_print(pdev);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to read registers\n");
-
-	res = lab_drv_do_op(pdev, 5, 4, LAB_DRV_OP_SUB);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to write operation\n");
-
-	res = lab_drv_regs_print(pdev);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to read registers\n");
-
-	res = lab_drv_do_op(pdev, 3, 5, LAB_DRV_OP_MUL);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to write operation\n");
-
-	res = lab_drv_regs_print(pdev);
-	if (res)
-		return dev_err_probe(&pdev->dev, res,
-				     "Failed to read registers\n");
-
 	return 0;
+}
+
+static void lab_drv_remove(struct platform_device *pdev)
+{
+	struct lab_drv *priv = platform_get_drvdata(pdev);
+	kobject_put(&priv->kobj);
 }
 
 // clang-format off
@@ -131,11 +175,14 @@ static const struct of_device_id lab_drv_match[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(of, lab_drv_match);
+// clang-format on
 
+// clang-format off
 static struct platform_driver lab_drv = {
 	.probe	= lab_drv_probe,
+    .remove = lab_drv_remove,
 	.driver	= {
-		.name		= "lab_driver",
+		.name		= LAB_DRV_NAME,
 		.owner		= THIS_MODULE,
 		.of_match_table = lab_drv_match,
 	}
