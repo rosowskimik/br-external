@@ -1,48 +1,128 @@
+#include <linux/array_size.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
-#include <linux/ioport.h>
-#include <linux/device.h>
-#include <linux/dev_printk.h>
+#include <linux/io.h>
+#include <linux/types.h>
+#include <linux/device/devres.h>
 #include <linux/errno.h>
+#include <linux/dev_printk.h>
+#include <linux/compiler_types.h>
+#include <linux/regmap.h>
 
-static int lab_drv_probe(struct platform_device *pdev)
+// clang-format off
+#define LAB_DRV_ARG1	0x00
+#define LAB_DRV_ARG2	0x04
+#define LAB_DRV_OP	0x08
+#define LAB_DRV_RES	0x0C
+
+#define LAB_DRV_OP_ADD	'+'
+#define LAB_DRV_OP_SUB	'-'
+#define LAB_DRV_OP_MUL	'*'
+// clang-format on
+
+static const struct regmap_config lab_drv_regmap_config = {
+	.reg_bits = 32,
+	.val_bits = 32,
+	.reg_stride = 4,
+	.max_register = LAB_DRV_RES,
+};
+
+struct lab_drv {
+	struct regmap *map;
+};
+
+static int lab_drv_regs_print(struct platform_device *pdev)
 {
-	struct device *dev = &pdev->dev;
-	struct device_node *np = dev->of_node;
-	struct resource *mem_res;
-	const char *label;
-	u32 repeat;
-	u32 ratio[2];
+	static int regs[] = { LAB_DRV_ARG1, LAB_DRV_ARG2, LAB_DRV_OP,
+			      LAB_DRV_RES };
+	struct lab_drv *priv = platform_get_drvdata(pdev);
+	u32 val[4];
+	int res;
 
-	if (!(mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0))) {
-		dev_err(dev, "Failed to get memory resource\n");
-		return -ENXIO;
-	}
+	res = regmap_multi_reg_read(priv->map, regs, val, 4);
+	if (res)
+		return res;
 
-	dev_info(dev, "Memory start: 0x%08llX\n", mem_res->start);
-	dev_info(dev, "Memory end: 0x%08llX\n", mem_res->end);
-	dev_info(dev, "Size: 0x%lld bytes\n", resource_size(mem_res));
-
-	if (of_property_read_string(np, "label", &label))
-		dev_warn(dev, "Failed to read 'label'\n");
-
-	if (of_property_read_u32(np, "repeat", &repeat))
-		dev_warn(dev, "Failed to read 'repeat'\n");
-
-	if (of_property_read_u32_array(np, "ratio", ratio, ARRAY_SIZE(ratio)))
-		dev_warn(dev, "Failed to read 'ratio'\n");
-
-	dev_info(dev, "string label = \"%s\"\n", label);
-	dev_info(dev, "u32 repeat = <%d>\n", repeat);
-	dev_info(dev, "u32 array ratio = <%d %d>\n", ratio[0], ratio[1]);
-
+	dev_info(&pdev->dev, "arg1: %d, arg2: %d, op: %c, res: %d\n", val[0],
+		 val[1], (char)val[2], val[3]);
 	return 0;
 }
 
-static void lab_drv_remove(struct platform_device *pdev)
+static int lab_drv_do_op(struct platform_device *pdev, u32 arg1, u32 arg2,
+			 u32 op)
 {
-	pr_debug("Remove\n");
+	struct lab_drv *priv = platform_get_drvdata(pdev);
+	struct reg_sequence regs[] = {
+		{ LAB_DRV_ARG1, arg1 },
+		{ LAB_DRV_ARG2, arg2 },
+		{ LAB_DRV_OP, op },
+	};
+
+	return regmap_multi_reg_write(priv->map, regs, ARRAY_SIZE(regs));
+}
+
+static int lab_drv_probe(struct platform_device *pdev)
+{
+	struct lab_drv *priv;
+	void __iomem *regs;
+	int res;
+
+	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
+
+	regs = devm_platform_ioremap_resource(pdev, 0);
+	if (IS_ERR(regs))
+		return dev_err_probe(&pdev->dev, PTR_ERR(regs),
+				     "Failed to map registers\n");
+
+	priv->map =
+		devm_regmap_init_mmio(&pdev->dev, regs, &lab_drv_regmap_config);
+	if (IS_ERR(priv->map))
+		return dev_err_probe(&pdev->dev, PTR_ERR(priv->map),
+				     "Failed to initialize regmap\n");
+
+	platform_set_drvdata(pdev, priv);
+
+	dev_info(&pdev->dev, "Device initialized\n");
+
+	res = lab_drv_regs_print(pdev);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to read registers\n");
+
+	res = lab_drv_do_op(pdev, 2, 3, LAB_DRV_OP_ADD);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to write operation\n");
+
+	res = lab_drv_regs_print(pdev);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to read registers\n");
+
+	res = lab_drv_do_op(pdev, 5, 4, LAB_DRV_OP_SUB);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to write operation\n");
+
+	res = lab_drv_regs_print(pdev);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to read registers\n");
+
+	res = lab_drv_do_op(pdev, 3, 5, LAB_DRV_OP_MUL);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to write operation\n");
+
+	res = lab_drv_regs_print(pdev);
+	if (res)
+		return dev_err_probe(&pdev->dev, res,
+				     "Failed to read registers\n");
+
+	return 0;
 }
 
 // clang-format off
@@ -54,7 +134,6 @@ MODULE_DEVICE_TABLE(of, lab_drv_match);
 
 static struct platform_driver lab_drv = {
 	.probe	= lab_drv_probe,
-	.remove	= lab_drv_remove,
 	.driver	= {
 		.name		= "lab_driver",
 		.owner		= THIS_MODULE,

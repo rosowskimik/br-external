@@ -132,9 +132,6 @@
 			compatible = "put,first_device";
 			reg = <0 0x01000000 0 0xF>;
 			status = "okay";
-			label = "Hello";
-			repeat = <2>;
-                        ratio = <12 5>;
 		};
 	};
 };

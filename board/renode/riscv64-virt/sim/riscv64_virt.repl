@@ -41,6 +41,28 @@ vrng0: Miscellaneous.VirtIOMMIOEntropy @ sysbus 0x10030000
 rtc0: Timers.PL031 @ sysbus 0x10090000
     IRQ -> plic@4
 
+first_device: Python.PythonPeripheral @ sysbus 0x01000000
+    size: 0x10
+    initable: true
+    script: '''
+if request.IsInit:
+    regs = [0, 0, 0, 0]
+elif request.IsRead:
+    request.Value = regs[request.Offset // 4]
+elif request.IsWrite:
+    if request.Offset in (0, 4):
+        regs[request.Offset // 4] = request.Value
+    elif request.Offset == 8 and request.Value in (ord("+"), ord("-"), ord("*")):
+        regs[request.Offset // 4] = request.Value
+
+    if regs[2] == ord("+"):
+        regs[3] = regs[0] + regs[1]
+    elif regs[2] == ord("-"):
+        regs[3] = regs[0] - regs[1]
+    elif regs[2] == ord("*"):
+        regs[3] = regs[0] * regs[1]
+'''
+
 sysbus:
     init:
         Tag <0x80000000 0x40000> "mmode_resv0@80000000"
