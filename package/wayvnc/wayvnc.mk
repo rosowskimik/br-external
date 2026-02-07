@@ -1,10 +1,10 @@
 ################################################################################
 #
-# neatvnc
+# wayvnc
 #
 ################################################################################
 
-WAYVNC_VERSION = 0.9.1
+WAYVNC_VERSION = 0.10.0
 WAYVNC_SITE = $(call github,any1,wayvnc,v$(WAYVNC_VERSION))
 WAYVNC_LICENSE = ISC
 WAYVNC_LICENSE_FILES = COPYING
