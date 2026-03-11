@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-AML_VERSION = 0.3.0
+AML_VERSION = 1.0.0
 AML_SITE = $(call github,any1,aml,v$(AML_VERSION))
 AML_LICENSE = ISC
 AML_LICENSE_FILES = COPYING
