@@ -1,5 +1,6 @@
 menu "Target Packages"
 
+source "$BR2_EXTERNAL_RPI_PATH/package/amd-ucode/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/aml/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/bottom/Config.in"
 source "$BR2_EXTERNAL_RPI_PATH/package/caddy/Config.in"
