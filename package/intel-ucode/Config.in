@@ -1,0 +1,7 @@
+config BR2_PACKAGE_INTEL_UCODE
+	bool "intel-ucode"
+	depends on BR2_x86_64 || BR2_i386
+	help
+	  This package provides Intel microcode data in initramfs format.
+
+	  https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files
