@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NEATVNC_VERSION = 1.0.0
+NEATVNC_VERSION = 1.0.1
 NEATVNC_SITE = $(call github,any1,neatvnc,v$(NEATVNC_VERSION))
 NEATVNC_LICENSE = ISC
 NEATVNC_LICENSE_FILES = COPYING
