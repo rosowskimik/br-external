@@ -1,5 +1,5 @@
 config BR2_TARGET_ROOTFS_UKI
-	bool "initial RAM filesystem linked into unified kernel image"
+	bool "Unified Kernel Image (UKI)"
 	depends on BR2_HOST_GCC_AT_LEAST_8
 	depends on BR2_PACKAGE_SYSTEMD_STUB_ARCH_SUPPORTS
 	depends on BR2_PACKAGE_GNU_EFI_ARCH_SUPPORTS
