@@ -11,6 +11,18 @@ arm_64bit=1
 # Run as fast as firmware / board allows
 arm_boost=1
 
+# Enable i2c
+i2c_arm=on
+
+# Enable spi
+spi=on
+
+# uart on pins 14/15
+dtoverlay=miniuart-bt
+
+# gpu
+dtoverlay=vc4-kms-v3d,cma-64,noaudio,nohdmi
+
 # Enable debug UART output from bootloader
 enable_uart=1
 uart_2ndstage=1
@@ -20,4 +32,4 @@ gpu_mem=64
 
 [pi02]
 kernel=u-boot.bin
-device_tree=bcm2710-rpi-zero-2-w-custom.dtb
+device_tree=bcm2710-rpi-zero-2-w.dtb
